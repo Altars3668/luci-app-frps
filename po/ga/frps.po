@@ -1,26 +1,27 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2024-08-31 15:13+0000\n"
-"Last-Translator: Kieli Puoli <kielipuoli@gmail.com>\n"
-"Language-Team: Finnish <https://hosted.weblate.org/projects/openwrt/"
-"luciapplicationsfrps/fi/>\n"
-"Language: fi\n"
+"PO-Revision-Date: 2024-09-05 13:29+0000\n"
+"Last-Translator: Aindriú Mac Giolla Eoin <aindriu80@gmail.com>\n"
+"Language-Team: Irish <https://hosted.weblate.org/projects/openwrt/"
+"luciapplicationsfrps/ga/>\n"
+"Language: ga\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"Plural-Forms: nplurals=5; plural=n==1 ? 0 : n==2 ? 1 : (n>2 && n<7) ? 2 :("
+"n>6 && n<11) ? 3 : 4;\n"
 "X-Generator: Weblate 5.8-dev\n"
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:15
 msgid "Additional configs"
-msgstr "Lisäasetukset"
+msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:43
 msgid "Additional settings"
-msgstr "Lisäasetukset"
+msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:40
 msgid "Allow ports"
-msgstr "Sallitut portit"
+msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:40
 msgid ""
@@ -42,16 +43,16 @@ msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:19
 msgid "Bind address"
-msgstr "Sido osoite"
+msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:20
 msgid "Bind port"
-msgstr "Sido portti"
+msgstr "Calafort ceangail"
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:19
 msgid ""
-"BindAddr specifies the address that the server binds to.<br />By default, this "
-"value is \"0.0.0.0\"."
+"BindAddr specifies the address that the server binds to.<br />By default, "
+"this value is \"0.0.0.0\"."
 msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:22
@@ -63,8 +64,8 @@ msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:20
 msgid ""
-"BindPort specifies the port that the server listens on.<br />By default, this "
-"value is 7000."
+"BindPort specifies the port that the server listens on.<br />By default, "
+"this value is 7000."
 msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:21
@@ -76,11 +77,11 @@ msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:143
 msgid "Collecting data ..."
-msgstr ""
+msgstr "Sonraí á mbailiú ..."
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:151
 msgid "Common settings"
-msgstr "Yleiset asetukset"
+msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:15
 msgid "Config files include in temporary config file"
@@ -122,8 +123,8 @@ msgstr ""
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:28
 msgid ""
 "DashboardPort specifies the port that the dashboard listens on. If this "
-"value is 0, the dashboard will not be started.<br />By default, this value is "
-"0."
+"value is 0, the dashboard will not be started.<br />By default, this value "
+"is 0."
 msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:30
@@ -159,8 +160,8 @@ msgstr ""
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:42
 msgid ""
 "HeartBeatTimeout specifies the maximum time to wait for a heartbeat before "
-"terminating the connection. It is not recommended to change this value."
-"<br />By default, this value is 90."
+"terminating the connection. It is not recommended to change this value.<br /"
+">By default, this value is 90."
 msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:42
@@ -173,11 +174,11 @@ msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:32
 msgid "Log file"
-msgstr "Lokitiedosto"
+msgstr "Comhad logála"
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:33
 msgid "Log level"
-msgstr "Lokitaso"
+msgstr "Leibhéal logála"
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:34
 msgid "Log max days"
@@ -200,8 +201,9 @@ msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:33
 msgid ""
-"LogLevel specifies the minimum log level. Valid values are \"trace\", \"debug"
-"\", \"info\", \"warn\", and \"error\".<br />By default, this value is \"info\"."
+"LogLevel specifies the minimum log level. Valid values are \"trace\", "
+"\"debug\", \"info\", \"warn\", and \"error\".<br />By default, this value is "
+"\"info\"."
 msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:34
@@ -218,13 +220,13 @@ msgstr ""
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:41
 msgid ""
 "MaxPortsPerClient specifies the maximum number of ports a single client may "
-"proxy to. If this value is 0, no limit will be applied.<br />By default, this "
-"value is 0."
+"proxy to. If this value is 0, no limit will be applied.<br />By default, "
+"this value is 0."
 msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:118
 msgid "NOT RUNNING"
-msgstr "EI KÄYNNISSÄ"
+msgstr "NÍ RÚCHÁN"
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:14
 msgid ""
@@ -244,7 +246,7 @@ msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:116
 msgid "RUNNING"
-msgstr "KÄYNNISSÄ"
+msgstr "REATHA"
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:13
 msgid "Respawn when crashed"
@@ -267,9 +269,9 @@ msgstr ""
 msgid ""
 "SubDomainHost specifies the domain that will be attached to sub-domains "
 "requested by the client when using Vhost proxying. For example, if this "
-"value is set to \"frps.com\" and the client requested the subdomain \"test"
-"\", the resulting URL would be \"test.frps.com\".<br />By default, this value "
-"is \"\"."
+"value is set to \"frps.com\" and the client requested the subdomain "
+"\"test\", the resulting URL would be \"test.frps.com\".<br />By default, "
+"this value is \"\"."
 msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:37
@@ -294,7 +296,7 @@ msgstr ""
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:36
 msgid "Token"
-msgstr ""
+msgstr "Ticéad"
 
 #: applications/luci-app-frps/htdocs/luci-static/resources/view/frps.js:36
 msgid ""
