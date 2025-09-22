@@ -4,121 +4,11 @@
 'require rpc';
 'require tools.widgets as widgets';
 
-/*
- * Important:
- *
- * This LuCI page writes UCI options into /etc/config/frps.
- * UCI option names must not contain ".".
- *
- * Therefore we keep UCI-safe option names here, then let init/generator script
- * convert them to frp TOML keys, for example:
- *
- *   bind_addr             -> bindAddr
- *   bind_port             -> bindPort
- *   kcp_bind_port         -> kcpBindPort
- *   quic_bind_port        -> quicBindPort
- *   admin_port            -> webServer.port
- *   admin_tls_cert_file   -> webServer.tls.certFile
- *   tls_force             -> transport.tls.force
- *   max_pool_count        -> transport.maxPoolCount
- *   authentication_method -> auth.method
- *   token_source_type   -> auth.tokenSource.type
- *
- * Do NOT use option names like "webServer.port" in LuCI form options.
- */
-
-/*
- * Debug-only TOML mapping. Keep these TOML: hints in the JS source for
- * troubleshooting generated configs, but do not show them in LuCI form text
- * and do not wrap them in _().
- *
- * common.bind_addr -> TOML: bindAddr
- * common.bind_port -> TOML: bindPort
- * common.kcp_bind_port -> TOML: kcpBindPort
- * common.quic_bind_port -> TOML: quicBindPort
- * common.proxy_bind_addr -> TOML: proxyBindAddr
- * common.vhost_http_port -> TOML: vhostHTTPPort
- * common.vhost_https_port -> TOML: vhostHTTPSPort
- * common.vhost_http_timeout -> TOML: vhostHTTPTimeout
- * common.tcpmux_httpconnect_port -> TOML: tcpmuxHTTPConnectPort
- * common.tcpmux_passthrough -> TOML: tcpmuxPassthrough
- * common.subdomain_host -> TOML: subDomainHost
- * common.custom_404_page -> TOML: custom404Page
- * common.udp_packet_size -> TOML: udpPacketSize
- * common.detailed_errors_to_client -> TOML: detailedErrorsToClient
- * common.user_conn_timeout -> TOML: userConnTimeout
- * common.nathole_analysis_data_reserve_hours -> TOML: natholeAnalysisDataReserveHours
- * common.authentication_method -> TOML: auth.method
- * common.token -> TOML: auth.token
- * common.auth_additional_scopes -> TOML: auth.additionalScopes
- * common.token_source_type -> TOML: auth.tokenSource.type
- * common.token_source_file_path -> TOML: auth.tokenSource.file.path
- * common.token_source_exec_command -> TOML: auth.tokenSource.exec.command
- * common.token_source_exec_args -> TOML: auth.tokenSource.exec.args
- * common.token_source_exec_env -> TOML: auth.tokenSource.exec.env
- * common.oidc_issuer -> TOML: auth.oidc.issuer
- * common.oidc_audience -> TOML: auth.oidc.audience
- * common.oidc_skip_expiry_check -> TOML: auth.oidc.skipExpiryCheck
- * common.oidc_skip_issuer_check -> TOML: auth.oidc.skipIssuerCheck
- * common.max_pool_count -> TOML: transport.maxPoolCount
- * common.tcp_mux -> TOML: transport.tcpMux
- * common.tcp_mux_keepalive_interval -> TOML: transport.tcpMuxKeepaliveInterval
- * common.tcp_keepalive -> TOML: transport.tcpKeepalive
- * common.heartbeat_timeout -> TOML: transport.heartbeatTimeout
- * common.tls_force -> TOML: transport.tls.force
- * common.tls_cert_file -> TOML: transport.tls.certFile
- * common.tls_key_file -> TOML: transport.tls.keyFile
- * common.tls_trusted_ca_file -> TOML: transport.tls.trustedCaFile
- * common.quic_keepalive_period -> TOML: transport.quic.keepalivePeriod
- * common.quic_max_idle_timeout -> TOML: transport.quic.maxIdleTimeout
- * common.quic_max_incoming_streams -> TOML: transport.quic.maxIncomingStreams
- * common.admin_addr -> TOML: webServer.addr
- * common.admin_port -> TOML: webServer.port
- * common.admin_user -> TOML: webServer.user
- * common.admin_pwd -> TOML: webServer.password
- * common.admin_tls_cert_file -> TOML: webServer.tls.certFile
- * common.admin_tls_key_file -> TOML: webServer.tls.keyFile
- * common.assets_dir -> TOML: webServer.assetsDir
- * common.pprof_enable -> TOML: webServer.pprofEnable
- * common.enable_prometheus -> TOML: enablePrometheus
- * common.allow_ports -> TOML: allowPorts
- * common.max_ports_per_client -> TOML: maxPortsPerClient
- * common.ssh_tunnel_bind_port -> TOML: sshTunnelGateway.bindPort
- * common.ssh_tunnel_private_key_file -> TOML: sshTunnelGateway.privateKeyFile
- * common.ssh_tunnel_auto_gen_private_key_path -> TOML: sshTunnelGateway.autoGenPrivateKeyPath
- * common.ssh_tunnel_authorized_keys_file -> TOML: sshTunnelGateway.authorizedKeysFile
- * common.log_file -> TOML: log.to
- * common.log_level -> TOML: log.level
- * common.log_max_days -> TOML: log.maxDays
- * common.disable_log_color -> TOML: log.disablePrintColor
- * http_plugin.name -> TOML: httpPlugins[].name
- * http_plugin.addr -> TOML: httpPlugins[].addr
- * http_plugin.path -> TOML: httpPlugins[].path
- * http_plugin.ops -> TOML: httpPlugins[].ops
- * http_plugin.tls_verify -> TOML: httpPlugins[].tlsVerify
- */
-
-const startupConf = [
-	[form.Flag, 'stdout', _('Log stdout'), null,
-	{
-		enabled: '1',
-		disabled: '0',
-		default: '1',
-		rmempty: false,
-		retain: true,
-		remove: writeFlagDisabled
-	}],
-
-	[form.Flag, 'stderr', _('Log stderr'), null,
-	{
-		enabled: '1',
-		disabled: '0',
-		default: '1',
-		rmempty: false,
-		retain: true,
-		remove: writeFlagDisabled
-	}],
-
+//	[Widget, Option, Title, Description, {Param: 'Value'}],
+var startupConf = [
+	[form.Flag, 'enabled', _('Enabled'), _('Enable or disable the frps service (init.enabled).')],
+	[form.Flag, 'stdout', _('Log stdout')],
+	[form.Flag, 'stderr', _('Log stderr')],
 	[widgets.UserSelect, 'user', _('Run daemon as user')],
 	[widgets.GroupSelect, 'group', _('Run daemon as group')],
 
@@ -207,8 +97,9 @@ var grpLogging = [
 	[form.Flag, 'disable_log_color', _('Disable log color'), _('DisableLogColor disables log colors when LogWay == "console" when set to true.<br />By default, this value is false.'), {datatype: 'bool', default: 'true'}]
 ];
 
+// Additional settings: rename '_' to 'extra_settings' (still read old '_' if exists)
 var grpAdditional = [
-	[form.DynamicList, '_', _('Additional settings'), _('This list can be used to specify some additional parameters which have not been included in this LuCI.'), {placeholder: 'Key-A=Value-A'}]
+	[form.DynamicList, 'extra_settings', _('Additional settings'), _('This list can be used to specify some additional parameters which have not been included in this LuCI.'), {placeholder: 'Key-A=Value-A'}]
 ];
 
 const commonAuthConf = [
@@ -857,20 +748,17 @@ function defTabOpts(s, t, opts, params) {
 
 		setParams(o, opt[4]);
 		setParams(o, params);
-
-		/*
-		 * Per-option optional must win over tab-wide optional.
-		 * This is important for form.Flag with default='true',
-		 * otherwise LuCI may treat checked state as default and call remove().
-		 */
-		if (opt[4] && Object.prototype.hasOwnProperty.call(opt[4], 'optional'))
-			o.optional = opt[4].optional;
-
-		if (
-			!(opt[4] && Object.prototype.hasOwnProperty.call(opt[4], 'remove')) &&
-			!(params && Object.prototype.hasOwnProperty.call(params, 'remove'))
-		)
-			o.remove = removeIfPresent;
+		// DynamicList delete guard: ignore delete if option not present in UCI (avoid ubus code 4)
+		if (o instanceof form.DynamicList) {
+			(function(orig) {
+				o.remove = function(section_id) {
+					var cur = this.map.data.get(this.map.config, section_id, this.option);
+					if (cur == null)
+						return Promise.resolve();
+					return orig.apply(this, arguments);
+				};
+			})(o.remove);
+		}
 	}
 }
 
@@ -970,7 +858,14 @@ return view.extend({
 		defTabOpts(s, 'logging', grpLogging);
 		defTabOpts(s, 'additional', grpAdditional);
 
-		o = s.taboption('init', form.SectionValue, 'init', form.TypedSection, 'init', _('Startup Settings'));
+		// Backward compatibility: if old '_' list exists and new 'extra_settings' empty, show old values
+		var oldList = m.data.get('frps', 'common', '_');
+		var newList = m.data.get('frps', 'common', 'extra_settings');
+		if (oldList && (!newList || newList.length === 0)) {
+			m.data.set('frps', 'common', 'extra_settings', oldList);
+		}
+
+		o = s.taboption('init', form.SectionValue, 'init', form.TypedSection, 'init', _('Startup settings'));
 		s = o.subsection;
 		s.anonymous = true;
 		s.dynamic = true;
