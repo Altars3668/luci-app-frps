@@ -6,6 +6,12 @@ A **LuCI frontend and service integration for the frp server on OpenWrt / Immort
 
 > The tunnel server is the upstream [fatedier/frp](https://github.com/fatedier/frp) `frps` engine. This project integrates it with OpenWrt; it is neither a new frp engine nor a desktop administration application.
 
+## Current version and upstream
+
+UI package **99.1.0**, with original LuCI sources from **ImmortalWrt**. The custom UCI / TOML, authentication, Dashboard and automatic-firewall model remain.
+
+This refresh incorporates upstream application history and translations, ports form deletion/dependency/status fixes, preserves port-list and range output, and uses the current frp TOML log-colour key.
+
 ## What I changed
 
 | Change | Practical benefit |
@@ -78,8 +84,10 @@ An OpenWrt frp integration maintained by Altars3668, retaining provenance in sou
 
 Related: [FRPC client UI](https://github.com/Altars3668/luci-app-frpc) · [firmware CI](https://github.com/Altars3668/OpenWRT-CI).
 
-## Upstream baseline and regression checks
+## Upstream baseline and verification scope
 
 The verified source is [`immortalwrt/luci/applications/luci-app-frps`](https://github.com/immortalwrt/luci/tree/5fc1fac5684cac6eee2c7fbff78c65b867980dd8/applications/luci-app-frps), pinned to `5fc1fac5684c`. [UPSTREAM.md](UPSTREAM.md) explains provenance, imported history and retained customisations.
 
 `node tests/upstream-regression.mjs` and `python3 -I tests/config-generation.py`; generation tests use a temporary UCI stub and never start services.
+
+These checks cover syntax, translations and the listed local regressions, not full SDK / firmware builds for every architecture or live-device qualification. This publication updates sources and documentation; it neither installs software nor flashes devices or manufactures prebuilt artifacts.

@@ -6,6 +6,12 @@
 
 > 隧道服务由 [fatedier/frp](https://github.com/fatedier/frp) 的 `frps` 实现。本仓库负责 OpenWrt 集成，不是新写的 frp 服务端，也不是桌面版管理面板。
 
+## 当前版本与上游
+
+界面包 **99.1.0**；LuCI 原始源码来自 **ImmortalWrt**。保留自有 UCI / TOML、认证、Dashboard 与自动防火墙模型。
+
+本轮同步上游应用历史与翻译，移植表单删除 / 依赖 / 状态修复；端口列表和范围保持正确输出，日志颜色使用当前 frp 的 TOML 字段名。
+
 ## 我的改造与特色
 
 | 改造 | 实际作用 |
@@ -78,8 +84,10 @@ logread -e frps
 
 相关项目：[FRPC 客户端界面](https://github.com/Altars3668/luci-app-frpc) · [配套固件 CI](https://github.com/Altars3668/OpenWRT-CI)。
 
-## 上游基线与回归检查
+## 上游基线与验证边界
 
 源码来源已核实为 [immortalwrt/luci 的 `applications/luci-app-frps`](https://github.com/immortalwrt/luci/tree/5fc1fac5684cac6eee2c7fbff78c65b867980dd8/applications/luci-app-frps)，本轮基线为 `5fc1fac5684c`。来源、导入历史和保留的定制差异见 [UPSTREAM.md](UPSTREAM.md)。
 
 `node tests/upstream-regression.mjs` 和 `python3 -I tests/config-generation.py`；后者仅使用临时 UCI 替身，不启动服务。
+
+这些检查覆盖语法、翻译及所列本机回归；不等于所有架构 SDK / 固件构建或真实设备验收。本次发布更新源码和说明，不安装软件、不触发刷机，也不伪造预编译产物。
