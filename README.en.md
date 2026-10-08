@@ -41,7 +41,7 @@ Keep only one copy of the LuCI recipe. Install packages matching the target SDK 
 
 ## Usage
 
-1. Open **Services → frp Server** and configure the bind address and port.
+1. Open **Services → frp → Server** and configure the bind address and port.
 2. Set a strong Token or valid OIDC configuration. An empty Token is not a safe public-server default.
 3. Enable HTTP / HTTPS vhosts, QUIC or KCP as needed. Despite a “disabled” comment, the shipped UCI values enable vhost ports `80` / `443` and QUIC port `7000`. Check actual options and generated configuration to avoid listener conflicts.
 4. Configure allowed client ports / ranges and resource limits.
@@ -77,3 +77,9 @@ logread -e frps
 An OpenWrt frp integration maintained by Altars3668, retaining provenance in source and Git history. The engine comes from [fatedier/frp](https://github.com/fatedier/frp). This package's [Makefile](Makefile) declares **Apache-2.0**; dependencies retain their own licenses.
 
 Related: [FRPC client UI](https://github.com/Altars3668/luci-app-frpc) · [firmware CI](https://github.com/Altars3668/OpenWRT-CI).
+
+## Upstream baseline and regression checks
+
+The verified source is [`immortalwrt/luci/applications/luci-app-frps`](https://github.com/immortalwrt/luci/tree/5fc1fac5684cac6eee2c7fbff78c65b867980dd8/applications/luci-app-frps), pinned to `5fc1fac5684c`. [UPSTREAM.md](UPSTREAM.md) explains provenance, imported history and retained customisations.
+
+`node tests/upstream-regression.mjs` and `python3 -I tests/config-generation.py`; generation tests use a temporary UCI stub and never start services.

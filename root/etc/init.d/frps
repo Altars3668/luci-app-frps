@@ -111,7 +111,7 @@ build_config() {
 	[ -n "$_oidc_warn" ] && echo "# WARNING: OIDC selected but missing:$_oidc_warn (auth may fail)" >> "$CONF_TOML.tmp"
 	{
 		# Core keys tracker (for conflict detection with extra_settings later)
-		local _core_keys="bindPort quicBindPort kcpBindPort bindAddr proxyBindAddr vhostHTTPPort vhostHTTPSPort vhostHTTPTimeout subDomainHost webServer.addr webServer.port webServer.user webServer.password webServer.assetsDir auth.method auth.token auth.oidc.issuer auth.oidc.audience transport.tcpMux allowPorts maxPortsPerClient transport.tls.force transport.maxPoolCount transport.tcpMuxKeepaliveInterval transport.tcpKeepalive enablePrometheus userConnTimeout udpPacketSize log.to log.level log.maxDays log.disableColor transport.heartbeatTimeout custom404Page"
+		local _core_keys="bindPort quicBindPort kcpBindPort bindAddr proxyBindAddr vhostHTTPPort vhostHTTPSPort vhostHTTPTimeout subDomainHost webServer.addr webServer.port webServer.user webServer.password webServer.assetsDir auth.method auth.token auth.oidc.issuer auth.oidc.audience transport.tcpMux allowPorts maxPortsPerClient transport.tls.force transport.maxPoolCount transport.tcpMuxKeepaliveInterval transport.tcpKeepalive enablePrometheus userConnTimeout udpPacketSize log.to log.level log.maxDays log.disablePrintColor transport.heartbeatTimeout custom404Page"
 		echo "bindPort = $bind_port"
 		[ "$quic_bind_port" != 0 ] && echo "quicBindPort = $quic_bind_port"
 		[ "$kcp_bind_port" != 0 ] && echo "kcpBindPort = $kcp_bind_port"
@@ -151,7 +151,7 @@ build_config() {
 		echo "transport.tcpMux = $(bool_of "$tcp_mux")"
 		# allowPorts enhanced parsing: each UCI list item may contain comma/space separated tokens
 		local _allow_entries _raw_entry _tok
-		_allow_entries="$(uci -q show $UCI.common | sed -n "s/^$UCI\\.common\\.allow_ports='\(.*\)'/\1/p")"
+		_allow_entries="$allow_ports"
 		if [ -n "$_allow_entries" ]; then
 			echo "allowPorts = ["
 			for _raw_entry in $_allow_entries; do
@@ -188,7 +188,7 @@ build_config() {
 		fi
 		[ "$log_level" != info ] && echo "log.level = \"$log_level\""
 		[ "$log_max_days" != 3 ] && echo "log.maxDays = $log_max_days"
-		is_enabled "$disable_log_color" && echo "log.disableColor = true"
+		is_enabled "$disable_log_color" && echo "log.disablePrintColor = true"
 
 		# Heartbeat timeout logic: only emit if user diverges from automatic defaults.
 		# Upstream defaults: tcpMux=true -> -1 (disabled); tcpMux=false -> 90.

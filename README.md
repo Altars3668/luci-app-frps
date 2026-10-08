@@ -41,7 +41,7 @@ make package/luci-app-frps/compile V=s -j2
 
 ## 使用流程
 
-1. 打开 **服务 → frp 服务端**，设置监听地址与端口。
+1. 打开 **服务 → frp → 服务端**，设置监听地址与端口。
 2. 配置强 Token 或有效的 OIDC 参数；空 Token 不是安全的公网默认值。
 3. 按需开启 HTTP / HTTPS vhost、QUIC 或 KCP。默认配置文件虽然有“禁用”注释，但实际 vhost 值是 `80` / `443`，QUIC 是 `7000`；以选项值和生成配置为准，避免与其他服务抢端口。
 4. 设置客户端允许的端口 / 范围及资源限制。
@@ -77,3 +77,9 @@ logread -e frps
 由 Altars3668 维护的 OpenWrt frp 集成版本。保留原有源码和 Git 历史中的来源信息；核心来自 [fatedier/frp](https://github.com/fatedier/frp)。本包 [Makefile](Makefile) 声明 **Apache-2.0**，依赖遵循各自许可证。
 
 相关项目：[FRPC 客户端界面](https://github.com/Altars3668/luci-app-frpc) · [配套固件 CI](https://github.com/Altars3668/OpenWRT-CI)。
+
+## 上游基线与回归检查
+
+源码来源已核实为 [immortalwrt/luci 的 `applications/luci-app-frps`](https://github.com/immortalwrt/luci/tree/5fc1fac5684cac6eee2c7fbff78c65b867980dd8/applications/luci-app-frps)，本轮基线为 `5fc1fac5684c`。来源、导入历史和保留的定制差异见 [UPSTREAM.md](UPSTREAM.md)。
+
+`node tests/upstream-regression.mjs` 和 `python3 -I tests/config-generation.py`；后者仅使用临时 UCI 替身，不启动服务。

@@ -91,30 +91,141 @@ var grpAdditional = [
 	[form.DynamicList, 'extra_settings', _('Additional settings'), _('This list can be used to specify some additional parameters which have not been included in this LuCI.'), {placeholder: 'Key-A=Value-A'}]
 ];
 
+function writeFlagDisabled(section_id) {
+	return this.write(section_id, this.disabled || 'false');
+}
+
+function removeIfPresent(section_id) {
+	const this_cfg = this.uciconfig || this.section.uciconfig || this.map.config;
+	const this_sid = this.ucisection || section_id;
+	const this_opt = this.ucioption || this.option;
+
+	for (let i = 0; i < this.section.children.length; i++) {
+		const sibling = this.section.children[i];
+
+		if (sibling === this || sibling.ucioption == null)
+			continue;
+
+		const sibling_cfg = sibling.uciconfig || sibling.section.uciconfig || sibling.map.config;
+		const sibling_sid = sibling.ucisection || section_id;
+		const sibling_opt = sibling.ucioption || sibling.option;
+
+		if (this_cfg != sibling_cfg || this_sid != sibling_sid || this_opt != sibling_opt)
+			continue;
+
+		if (typeof sibling.isActive === 'function' && sibling.isActive(section_id))
+			return Promise.resolve();
+	}
+
+	if (this.map.data.get(this_cfg, this_sid, this_opt) == null)
+		return Promise.resolve();
+
+	return this.map.data.unset(this_cfg, this_sid, this_opt);
+}
+
+function isUciDeleteNotFoundError(err) {
+	const message = err && err.message ? err.message : String(err);
+
+	return /uci\/delete/.test(message) && /ubus code 4/.test(message);
+}
+
+function guardUciDeleteNotFound(data, config) {
+	data._frpIgnoreMissingDeleteConfigs ??= {};
+	data._frpIgnoreMissingDeleteConfigs[config] = true;
+
+	if (data._frpIgnoreMissingDeleteInstalled)
+		return;
+
+	const callDelete = data.callDelete;
+
+	data.callDelete = function(conf, sid, options) {
+		const guarded = this._frpIgnoreMissingDeleteConfigs && this._frpIgnoreMissingDeleteConfigs[conf];
+
+		return callDelete.apply(this, arguments).catch(L.bind(function(err) {
+			if (!guarded || !isUciDeleteNotFoundError(err))
+				return Promise.reject(err);
+
+			if (!Array.isArray(options) || options.length <= 1)
+				return null;
+
+			return Promise.all(options.map(L.bind(function(opt) {
+				return callDelete.call(this, conf, sid, [ opt ]).catch(function(e) {
+					return isUciDeleteNotFoundError(e) ? null : Promise.reject(e);
+				});
+			}, this)));
+		}, this));
+	};
+
+	data._frpIgnoreMissingDeleteInstalled = true;
+}
+
+function normalizeDepends(depends) {
+	if (depends == null)
+		return [];
+
+	return Array.isArray(depends) ? depends : [ depends ];
+}
+
+function mergeDepends(existing, next) {
+	const current = normalizeDepends(existing);
+	const incoming = normalizeDepends(next);
+
+	if (current.length === 0)
+		return incoming;
+
+	if (incoming.length === 0)
+		return current;
+
+	const merged = [];
+
+	for (let oldDep of current) {
+		for (let newDep of incoming) {
+			const dep = {};
+			let conflict = false;
+
+			for (let key in oldDep)
+				dep[key] = oldDep[key];
+
+			for (let key in newDep) {
+				if (Object.prototype.hasOwnProperty.call(dep, key) && dep[key] !== newDep[key]) {
+					conflict = true;
+					break;
+				}
+
+				dep[key] = newDep[key];
+			}
+
+			if (!conflict)
+				merged.push(dep);
+		}
+	}
+
+	return merged;
+}
+
 function setParams(o, params) {
-	if (!params) return;
-	for (var key in params) {
-		var val = params[key];
+	if (!params)
+		return;
+
+	for (let key in params) {
+		let val = params[key];
+
 		if (key === 'values') {
-			for (var j = 0; j < val.length; j++) {
-				var args = val[j];
+			for (let v of val) {
+				let args = v;
+
 				if (!Array.isArray(args))
 					args = [args];
+
 				o.value.apply(o, args);
 			}
 		} else if (key === 'depends') {
-			if (!Array.isArray(val))
-				val = [val];
-			for (var j = 0; j < val.length; j++) {
-				var args = val[j];
-				if (!Array.isArray(args))
-					args = [args];
-				o.depends.apply(o, args);
-			}
+			o.deps = mergeDepends(o.deps, val);
 		} else {
 			o[key] = params[key];
 		}
 	}
+
 	if (params['datatype'] === 'bool') {
 		o.enabled = 'true';
 		o.disabled = 'false';
@@ -145,61 +256,66 @@ function swallowUciDelete(promise) {
 }
 
 function defTabOpts(s, t, opts, params) {
-	for (var i = 0; i < opts.length; i++) {
-		var opt = opts[i];
-		var o = s.taboption(t, opt[0], opt[1], opt[2], opt[3]);
+	for (let opt of opts) {
+		const o = s.taboption(t, opt[0], opt[1], opt[2], opt[3]);
+
 		setParams(o, opt[4]);
 		setParams(o, params);
-		if (typeof o.remove === 'function') {
-			(function(orig) {
-				o.remove = function(section_id) {
-					if (this.option) {
-						var cur = this.map.data.get(this.map.config, section_id, this.option);
-						if (cur == null)
-							return Promise.resolve();
-					}
-					var res = orig.apply(this, arguments);
-					return Promise.resolve(res).catch(function(err) {
-						var msg = err && err.message ? err.message : err;
-						if (msg) {
-							var text = '' + msg;
-							if (text.indexOf('uci/delete') !== -1 || text.indexOf('Not found') !== -1 || text.indexOf('code 4') !== -1)
-								return Promise.resolve();
-						}
-						throw err;
-					});
-				};
-			})(o.remove);
+
+		/*
+		 * Per-option optional must win over tab-wide optional.
+		 * This is important for form.Flag with default='true',
+		 * otherwise LuCI may treat checked state as default and call remove().
+		 */
+		// 保留定制表格中逐字段的可见性设置。
+		if (opt[4] && Object.prototype.hasOwnProperty.call(opt[4], 'modalonly'))
+			o.modalonly = opt[4].modalonly;
+
+		if (opt[4] && Object.prototype.hasOwnProperty.call(opt[4], 'optional'))
+			o.optional = opt[4].optional;
+
+		if (
+			!(opt[4] && Object.prototype.hasOwnProperty.call(opt[4], 'remove')) &&
+			!(params && Object.prototype.hasOwnProperty.call(params, 'remove'))
+		) {
+			if (opt[0] === form.Flag) {
+				// 关闭开关必须保存 disabled，不能删除后被服务默认值重新启用。
+				o.rmempty = false;
+				o.retain = true;
+				o.remove = writeFlagDisabled;
+			} else {
+				o.remove = removeIfPresent;
+			}
 		}
 	}
 }
 
 function defOpts(s, opts, params) {
-	for (var i = 0; i < opts.length; i++) {
-		var opt = opts[i];
-		var o = s.option(opt[0], opt[1], opt[2], opt[3]);
+	for (let opt of opts) {
+		const o = s.option(opt[0], opt[1], opt[2], opt[3]);
+
 		setParams(o, opt[4]);
 		setParams(o, params);
-		if (typeof o.remove === 'function') {
-			(function(orig) {
-				o.remove = function(section_id) {
-					if (this.option) {
-						var cur = this.map.data.get(this.map.config, section_id, this.option);
-						if (cur == null)
-							return Promise.resolve();
-					}
-					var res = orig.apply(this, arguments);
-					return Promise.resolve(res).catch(function(err) {
-						var msg = err && err.message ? err.message : err;
-						if (msg) {
-							var text = '' + msg;
-							if (text.indexOf('uci/delete') !== -1 || text.indexOf('Not found') !== -1 || text.indexOf('code 4') !== -1)
-								return Promise.resolve();
-						}
-						throw err;
-					});
-				};
-			})(o.remove);
+
+		// 保留定制表格中逐字段的可见性设置。
+		if (opt[4] && Object.prototype.hasOwnProperty.call(opt[4], 'modalonly'))
+			o.modalonly = opt[4].modalonly;
+
+		if (opt[4] && Object.prototype.hasOwnProperty.call(opt[4], 'optional'))
+			o.optional = opt[4].optional;
+
+		if (
+			!(opt[4] && Object.prototype.hasOwnProperty.call(opt[4], 'remove')) &&
+			!(params && Object.prototype.hasOwnProperty.call(params, 'remove'))
+		) {
+			if (opt[0] === form.Flag) {
+				// 关闭开关必须保存 disabled，不能删除后被服务默认值重新启用。
+				o.rmempty = false;
+				o.retain = true;
+				o.remove = writeFlagDisabled;
+			} else {
+				o.remove = removeIfPresent;
+			}
 		}
 	}
 }
@@ -213,11 +329,17 @@ const callServiceList = rpc.declare({
 
 function getServiceStatus() {
 	return L.resolveDefault(callServiceList('frps'), {}).then(function (res) {
-		var isRunning = false;
-		try {
-			isRunning = res['frps']['instances']['instance1']['running'];
-		} catch (e) { }
-		return isRunning;
+		const instances = res.frps && res.frps.instances;
+
+		if (!instances)
+			return false;
+
+		for (let name in instances) {
+			if (instances[name] && instances[name].running)
+				return true;
+		}
+
+		return false;
 	});
 }
 
@@ -271,6 +393,7 @@ return view.extend({
 		let m, s, o;
 
 		m = new form.Map('frps', _('frp Server'));
+		guardUciDeleteNotFound(m.data, 'frps');
 
 		s = m.section(form.NamedSection, '_status');
 		s.anonymous = true;
